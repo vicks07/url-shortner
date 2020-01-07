@@ -14,15 +14,15 @@ const {Log} = require('./Models/Log.js');
 const ShortUrl = require('./Models/ShortUrl.js'); 
 // console.log('ENV',process.env);
 
-let urls = {
-    /*    url:'https://fitternity.com',
-        count: 0
-    },
-    'one':{
-        url:'https://www.fitternity.com/onepass',
-        count:0
-    }*/
-}
+// let urls = {
+//     /*    url:'https://fitternity.com',
+//         count: 0
+//     },
+//     'one':{
+//         url:'https://www.fitternity.com/onepass',
+//         count:0
+//     }*/
+// }
 
 app.use(bodyParser.json());
 
@@ -74,16 +74,45 @@ app.get('/:val',async(req,res)=>{
 //nBEaYuUvvfXBXXRy
 //urlshort
 app.post('/new/',async(req,res)=>{
-    console.log(req.body.url);
     const id = crypto.randomBytes(3).toString('hex');
-    urls[id] = {
+    let url = new ShortUrl({
         url: req.body.url,
         count: 0,
         code: id
-    }
-    await mongo.Save(urls[id]);
-    console.log(urls);
-    return res.send('Success');
+	});
+	let resp = await ShortUrl.findOne({code:code});
+	if(resp.code == undefined){
+		//await mongo.Save(url);
+		await url.save();
+		//console.log(urls);
+		return res.send('Success');
+	}
+	else{
+		return res.send('Oops! Something went wrong');
+	}
+});
+
+app.post('/custom',async(req,res)=>{
+	let {url,code} = req.body;
+	if(code.length <= 6){
+		let resp = await ShortUrl.findOne({code:code});
+		if(resp == null){
+			let redirectionUrl = new ShortUrl({
+				url: url,
+				code: code,
+				count: 0
+			})
+			await redirectionUrl.save();
+			return res.send('Success');
+		}
+		else{
+			return res.send(`Code ${code} already exists`);
+		}
+	}
+	else{
+		return res.send(`Code ${code} is too long`);
+	}
+	
 });
 
 app.listen(3002,()=>{
