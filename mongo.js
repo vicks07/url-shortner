@@ -1,10 +1,12 @@
 const {MongoClient, ObjectId} = require('mongodb');
 
 let db;
-let connection = 'mongodb+srv://urlshort:nBEaYuUvvfXBXXRy@cluster0-bkxjo.mongodb.net/shortner?retryWrites=true&w=majority'
-MongoClient.connect(connection,{useNewUrlParser: true,  useUnifiedTopology: true }, function(err, client) {
+let connection = process.env.MONGO_URI;
+
+MongoClient.connect(connection,
+    {useNewUrlParser: true,  useUnifiedTopology: true },
+    function(err, client) {
     if(err) throw err;
-  
     db = client.db('shortner');
   });
 

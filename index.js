@@ -77,7 +77,6 @@ app.post('/new/',async(req,res)=>{
     const id = crypto.randomBytes(3).toString('hex');
     let url = new ShortUrl({
         url: req.body.url,
-        count: 0,
         code: id
 	});
 	let resp = await ShortUrl.findOne({code:code});
@@ -99,8 +98,7 @@ app.post('/custom',async(req,res)=>{
 		if(resp == null){
 			let redirectionUrl = new ShortUrl({
 				url: url,
-				code: code,
-				count: 0
+				code: code
 			})
 			await redirectionUrl.save();
 			return res.send('Success');

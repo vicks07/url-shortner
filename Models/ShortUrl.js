@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const autoIncrement = require('mongoose-auto-increment');
 const Schema = mongoose.Schema;
-const connection = mongoose.createConnection('mongodb+srv://urlshort:nBEaYuUvvfXBXXRy@cluster0-bkxjo.mongodb.net/shortner?retryWrites=true&w=majority',{
+const connection = mongoose.createConnection(process.env.MONGO_URI,{
     useNewUrlParser:true,
     useUnifiedTopology: true
 });
@@ -9,13 +9,24 @@ const connection = mongoose.createConnection('mongodb+srv://urlshort:nBEaYuUvvfX
 autoIncrement.initialize(connection);
 
 const ShortUrlSchema = new Schema({
-    url: String,
-    code: String,
+    url: {
+        type: String,
+        required:true,
+        trim: true
+    },
+    code: {
+        type: String,
+        required: true,
+        trim: true
+    },
     num: {
         type:Number,
         ref: 'SerialNo'
     },
-    count: Number
+    count: {
+        type: Number,
+        default: 0
+    }
 },{
     collection: 'shorturls',
     timestamps:{ 
