@@ -2,9 +2,16 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const crypto = require("crypto");
-
+const dotenv = require('dotenv');
 const mongo = require('./mongo.js');
 
+dotenv.config({
+	path: './config/config.env'
+});
+
+
+const {Log} = require('./Models/Log.js');
+const ShortUrl = require('./Models/ShortUrl.js'); 
 // console.log('ENV',process.env);
 
 let urls = {
@@ -20,23 +27,41 @@ let urls = {
 app.use(bodyParser.json());
 
 app.get('/:val',async(req,res)=>{
+	try{
 	let code = req.params.val;
 	let headers = req.headers;
-    //console.log('COde',req.headers);
-    //let {url, count} = urls[code];
+		if(code!=='favicon.ico' && code!=null){
+			//let resp = await mongo.Read({code});
+			let resp = await ShortUrl.findOne({code:code});
+			//console.log('resppp',resp);
+			if(resp.code!== undefined){
+				await ShortUrl.updateOne({code:code},{$inc:{count:1}});
+				//await mongo.Count({code});
 
-    if(code!=='favicon.ico' && code!=null){
-        let resp = await mongo.Read({code});
-        if(resp.code!== undefined){
-			await mongo.Count({code});
-			await mongo.Log({
-				userAgent:headers,
-				date: new Date(),
-				code: code
-			 });
-        }
-        console.log(resp);
-		return res.redirect(resp.url);
+				const log = new Log({
+					userAgent: headers,
+					code: code
+				});
+
+				let logResp = await log.save();
+				//console.log('logResp',logResp);
+
+				// log.save((err)=>{
+				// 	if(err) throw err;
+
+				// 	console.log('Saved');
+				// });
+
+				// await mongo.Log({
+				// 	userAgent:headers,
+				// 	date: new Date(),
+				// 	code: code
+				//  });
+			}
+			return res.redirect(resp.url);
+		} 
+	}catch(err){
+		console.log(err);
 	}
 	
 	//request.connection.remoteAddress
