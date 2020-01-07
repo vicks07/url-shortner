@@ -59,10 +59,10 @@ app.post('/new/',async(req,res)=>{
     await mongo.Save(urls[id]);
     console.log(urls);
     return res.send('Success');
-})
+});
 
 app.listen(3002,()=>{
     console.log('Server started');
-})
+});
 
 
